@@ -1,4 +1,4 @@
-create table addresses
+create table address
 (
     id          varchar(100) not null,
     contact_id  varchar(100) not null,

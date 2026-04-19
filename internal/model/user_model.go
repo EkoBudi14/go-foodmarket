@@ -18,9 +18,14 @@ type VerifyUserRequest struct {
 }
 
 type RegisterUserRequest struct {
-	ID       string `json:"id" validate:"required,max=100"`
-	Password string `json:"password" validate:"required,max=100"`
-	Name     string `json:"name" validate:"required,max=100"`
+	ID          string `json:"id" validate:"required,max=100"`
+	Password    string `json:"password" validate:"required,max=100"`
+	Name        string `json:"name" validate:"required,max=100"`
+	Email       string `json:"email" validate:"required,email"`
+	Address     string `json:"address" validate:"required,max=100"`
+	HouseNumber string `json:"house_number" validate:"required,max=100"`
+	PhoneNumber string `json:"phone_number" validate:"required,max=100"`
+	City        string `json:"city" validate:"required,max=100"`
 }
 
 type UpdateUserRequest struct {
