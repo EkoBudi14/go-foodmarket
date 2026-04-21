@@ -35,6 +35,35 @@ func NewUserUseCase(db *gorm.DB, logger *logrus.Logger, validate *validator.Vali
 	}
 }
 
+func (c *UserUseCase) UpdatePhoto(ctx context.Context, request *model.UpdateProfilePhotoRequest, filePath string) (*model.UserResponse, error) {
+	tx := c.DB.WithContext(ctx).Begin()
+	defer tx.Rollback()
+
+	if err := c.Validate.Struct(request); err != nil {
+		c.Log.Warnf("Invalid request body : %+v", err)
+		return nil, fiber.ErrBadRequest
+	}
+
+	user := new(entity.User)
+	if err := c.UserRepository.FindById(tx, user, request.ID); err != nil {
+		c.Log.Warnf("Failed find user by id : %+v", err)
+		return nil, fiber.ErrNotFound
+	}
+
+	user.ProfilePhotoPath = &filePath
+	if err := c.UserRepository.Update(tx, user); err != nil {
+		c.Log.Warnf("Failed save user : %+v", err)
+		return nil, fiber.ErrInternalServerError
+	}
+
+	if err := tx.Commit().Error; err != nil {
+		c.Log.Warnf("Failed commit transaction : %+v", err)
+		return nil, fiber.ErrInternalServerError
+	}
+
+	return converter.UserToResponse(user), nil
+}
+
 func (c *UserUseCase) Verify(ctx context.Context, request *model.VerifyUserRequest) (*model.Auth, error) {
 	tx := c.DB.WithContext(ctx).Begin()
 	defer tx.Rollback()
