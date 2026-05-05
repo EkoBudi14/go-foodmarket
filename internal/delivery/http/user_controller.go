@@ -4,8 +4,11 @@ import (
 	"golang-clean-architecture/internal/delivery/http/middleware"
 	"golang-clean-architecture/internal/model"
 	"golang-clean-architecture/internal/usecase"
+	"os"
+	"path/filepath"
 
 	"github.com/gofiber/fiber/v2"
+	"github.com/google/uuid"
 	"github.com/sirupsen/logrus"
 )
 
@@ -104,4 +107,56 @@ func (c *UserController) Update(ctx *fiber.Ctx) error {
 	}
 
 	return ctx.JSON(model.WebResponse[*model.UserResponse]{Data: response})
+}
+
+func (c *UserController) UpdatePhoto(ctx *fiber.Ctx) error {
+	auth := middleware.GetUser(ctx)
+
+	file, err := ctx.FormFile("file")
+	if err != nil {
+		c.Log.Warnf("Failed to get file from request : %+v", err)
+		return fiber.ErrBadRequest
+	}
+
+	if file.Size > 2*1024*1024 {
+		return ctx.Status(401).JSON(model.WebResponse[any]{
+			Errors: "File size exceeds 2MB limit",
+		})
+	}
+
+	contentType := file.Header.Get("Content-Type")
+	allowedTypes := map[string]bool{
+		"image/jpeg": true, "image/png": true,
+		"image/gif": true, "image/webp": true,
+	}
+
+	if !allowedTypes[contentType] {
+		return ctx.Status(401).JSON(model.WebResponse[any]{
+			Errors: "File must be an image (jpeg, png, gif, webp)",
+		})
+	}
+
+	uploadDir := "./assets/user"
+	os.MkdirAll(uploadDir, os.ModePerm)
+
+	filename := uuid.New().String() + filepath.Ext(file.Filename)
+	savePath := filepath.Join(uploadDir, filename)
+
+	if err := ctx.SaveFile(file, savePath); err != nil {
+		c.Log.Warnf("Failed to save file : %+v", err)
+		return fiber.ErrInternalServerError
+	}
+
+	request := &model.UpdateProfilePhotoRequest{ID: auth.ID}
+
+	storePath := "assets/user/" + filename
+
+	response, err := c.UseCase.UpdatePhoto(ctx.UserContext(), request, storePath)
+	if err != nil {
+		c.Log.WithError(err).Warnf("Failed to update user photo")
+		return err
+	}
+
+	return ctx.JSON(model.WebResponse[*model.UserResponse]{Data: response})
+
 }

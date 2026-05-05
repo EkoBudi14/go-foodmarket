@@ -41,4 +41,5 @@ func (c *RouteConfig) SetupAuthRoute() {
 	c.App.Put("/api/contacts/:contactId/addresses/:addressId", c.AddressController.Update)
 	c.App.Get("/api/contacts/:contactId/addresses/:addressId", c.AddressController.Get)
 	c.App.Delete("/api/contacts/:contactId/addresses/:addressId", c.AddressController.Delete)
+	c.App.Static("/assets", "./assets")
 }
