@@ -11,6 +11,7 @@ type RouteConfig struct {
 	UserController    *http.UserController
 	ContactController *http.ContactController
 	AddressController *http.AddressController
+	FoodController    *http.FoodController
 	AuthMiddleware    fiber.Handler
 }
 
@@ -41,5 +42,8 @@ func (c *RouteConfig) SetupAuthRoute() {
 	c.App.Put("/api/contacts/:contactId/addresses/:addressId", c.AddressController.Update)
 	c.App.Get("/api/contacts/:contactId/addresses/:addressId", c.AddressController.Get)
 	c.App.Delete("/api/contacts/:contactId/addresses/:addressId", c.AddressController.Delete)
+
+	c.App.Get("/api/foods/:foodId", c.FoodController.Get)
+
 	c.App.Static("/assets", "./assets")
 }

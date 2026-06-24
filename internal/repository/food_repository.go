@@ -19,6 +19,10 @@ func NewFoodRepository(log *logrus.Logger) *FoodRepository {
 	}
 }
 
+func (r *FoodRepository) FindByid(db *gorm.DB, food *entity.Food, id string) error {
+	return db.Where("id = ? ", id).Take(food).Error
+}
+
 func (r *FoodRepository) Search(db *gorm.DB, request *model.FoodRequest) ([]entity.Food, error) {
 	var foods []entity.Food
 

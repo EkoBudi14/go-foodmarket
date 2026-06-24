@@ -30,27 +30,32 @@ func Bootstrap(config *BootstrapConfig) {
 	userRepository := repository.NewUserRepository(config.Log)
 	contactRepository := repository.NewContactRepository(config.Log)
 	addressRepository := repository.NewAddressRepository(config.Log)
+	foodRepository := repository.NewFoodRepository(config.Log)
 
 	// setup producer
 	var userProducer *messaging.UserProducer
 	var contactProducer *messaging.ContactProducer
 	var addressProducer *messaging.AddressProducer
+	var foodProducer *messaging.FoodProducer
 
 	if config.Producer != nil {
 		userProducer = messaging.NewUserProducer(config.Producer, config.Log)
 		contactProducer = messaging.NewContactProducer(config.Producer, config.Log)
 		addressProducer = messaging.NewAddressProducer(config.Producer, config.Log)
+		foodProducer = messaging.NewFoodProducer(config.Producer, config.Log)
 	}
 
 	// setup use cases
 	userUseCase := usecase.NewUserUseCase(config.DB, config.Log, config.Validate, userRepository, userProducer)
 	contactUseCase := usecase.NewContactUseCase(config.DB, config.Log, config.Validate, contactRepository, contactProducer)
 	addressUseCase := usecase.NewAddressUseCase(config.DB, config.Log, config.Validate, contactRepository, addressRepository, addressProducer)
+	foodUseCase := usecase.NewFoodUseCase(config.DB, config.Log, config.Validate, foodRepository, foodProducer)
 
 	// setup controller
 	userController := http.NewUserController(userUseCase, config.Log)
 	contactController := http.NewContactController(contactUseCase, config.Log)
 	addressController := http.NewAddressController(addressUseCase, config.Log)
+	foodController := http.NewFoodController(foodUseCase, config.Log)
 
 	// setup middleware
 	authMiddleware := middleware.NewAuth(userUseCase)
@@ -60,6 +65,7 @@ func Bootstrap(config *BootstrapConfig) {
 		UserController:    userController,
 		ContactController: contactController,
 		AddressController: addressController,
+		FoodController:    foodController,
 		AuthMiddleware:    authMiddleware,
 	}
 	routeConfig.Setup()
