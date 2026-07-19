@@ -10,6 +10,7 @@ import (
 
 	"github.com/go-playground/validator/v10"
 	"github.com/gofiber/fiber/v2"
+	"github.com/google/uuid"
 	"github.com/sirupsen/logrus"
 	"gorm.io/gorm"
 )
@@ -51,6 +52,50 @@ func (c *FoodUseCase) Get(ctx context.Context, request *model.FoodRequest) (*mod
 	if err := tx.Commit().Error; err != nil {
 		c.Log.WithError(err).Error("error getting food")
 		return nil, fiber.ErrInternalServerError
+	}
+
+	return converter.FoodToResponse(food), nil
+
+}
+
+func (c *FoodUseCase) Create(ctx context.Context, request *model.FoodRequest) (*model.FoodResponse, error) {
+	tx := c.DB.WithContext(ctx).Begin()
+	defer tx.Rollback()
+
+	if err := c.Validate.Struct(request); err != nil {
+		c.Log.WithError(err).Error("error validating request body")
+		return nil, fiber.ErrBadRequest
+	}
+
+	food := &entity.Food{
+		ID:          uuid.New().String(),
+		Name:        request.Name,
+		Description: request.Description,
+		Ingredients: request.Ingredients,
+		Types:       request.Types,
+		Price:       request.Price,
+		PicturePath: request.PicturePath,
+	}
+
+	if err := c.FoodRepository.Create(tx, food); err != nil {
+		c.Log.WithError(err).Error("error creating food")
+		return nil, fiber.ErrInternalServerError
+	}
+
+	if err := tx.Commit().Error; err != nil {
+		c.Log.WithError(err).Error("error creating contact")
+		return nil, fiber.ErrInternalServerError
+	}
+
+	if c.FoodProducer != nil {
+		event := converter.FoodToEvent(food)
+		if err := c.FoodProducer.Send(event); err != nil {
+			c.Log.WithError(err).Error("error publishing food created event")
+			return nil, fiber.ErrInternalServerError
+		}
+		c.Log.Info("Published food created event")
+	} else {
+		c.Log.Info("Kafka producer is disabled, skipping food created event")
 	}
 
 	return converter.FoodToResponse(food), nil

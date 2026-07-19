@@ -37,3 +37,19 @@ func (c *FoodController) Get(ctx *fiber.Ctx) error {
 
 	return ctx.JSON(model.WebResponse[*model.FoodResponse]{Data: response})
 }
+
+func (c *FoodController) Create(ctx *fiber.Ctx, request *model.FoodRequest) error {
+
+	if err := ctx.BodyParser(request); err != nil {
+		c.Log.WithError(err).Error("error parsing request body")
+		return fiber.ErrBadRequest
+	}
+
+	response, err := c.useCase.Create(ctx.UserContext(), request)
+	if err != nil {
+		c.Log.WithError(err).Error("error creating food")
+		return err
+	}
+
+	return ctx.JSON(model.WebResponse[*model.FoodResponse]{Data: response})
+}
