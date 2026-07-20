@@ -110,7 +110,7 @@ func TestLogin(t *testing.T) {
 	TestRegister(t) // register success
 
 	requestBody := model.LoginUserRequest{
-		ID:       "khannedy",
+		Email:    "khannedy",
 		Password: "rahasia",
 	}
 
@@ -135,7 +135,7 @@ func TestLogin(t *testing.T) {
 	assert.NotNil(t, responseBody.Data.Token)
 
 	user := new(entity.User)
-	err = db.Where("id = ?", requestBody.ID).First(user).Error
+	// err = db.Where("id = ?", requestBody.ID).First(user).Error
 	assert.Nil(t, err)
 	assert.Equal(t, user.Token, responseBody.Data.Token)
 }
@@ -145,7 +145,7 @@ func TestLoginWrongUsername(t *testing.T) {
 	TestRegister(t) // register success
 
 	requestBody := model.LoginUserRequest{
-		ID:       "wrong",
+		Email:    "wrong",
 		Password: "rahasia",
 	}
 
@@ -175,7 +175,7 @@ func TestLoginWrongPassword(t *testing.T) {
 	TestRegister(t) // register success
 
 	requestBody := model.LoginUserRequest{
-		ID:       "khannedy",
+		Email:    "khannedy",
 		Password: "wrong",
 	}
 

@@ -38,8 +38,25 @@ func (c *FoodController) Get(ctx *fiber.Ctx) error {
 	return ctx.JSON(model.WebResponse[*model.FoodResponse]{Data: response})
 }
 
-func (c *FoodController) Create(ctx *fiber.Ctx, request *model.FoodRequest) error {
+func (c *FoodController) List(ctx *fiber.Ctx) error {
+	request := &model.FoodRequest{
+		Limit: 10,
+	}
 
+	response, err := c.useCase.List(ctx.UserContext(), request)
+
+	if err != nil {
+		c.Log.WithError(err).Error("error getting food")
+		return err
+	}
+
+	return ctx.JSON(model.WebResponse[[]*model.FoodResponse]{Data: response})
+
+}
+
+func (c *FoodController) Create(ctx *fiber.Ctx) error {
+
+	request := &model.FoodRequest{}
 	if err := ctx.BodyParser(request); err != nil {
 		c.Log.WithError(err).Error("error parsing request body")
 		return fiber.ErrBadRequest
@@ -53,3 +70,26 @@ func (c *FoodController) Create(ctx *fiber.Ctx, request *model.FoodRequest) erro
 
 	return ctx.JSON(model.WebResponse[*model.FoodResponse]{Data: response})
 }
+
+func (c *FoodController) Update(ctx *fiber.Ctx) error {
+	request := &model.FoodRequest{}
+
+	if err := ctx.BodyParser(request); err != nil {
+		c.Log.WithError(err).Error("error parsing request body")
+		return fiber.ErrBadRequest
+	}
+
+	request.ID = ctx.Params("foodId")
+
+	response, err := c.useCase.Update(ctx.UserContext(), request)
+	if err != nil {
+		c.Log.WithError(err).Error("error updating food")
+		return err
+	}
+
+	return ctx.JSON(model.WebResponse[*model.FoodResponse]{Data: response})
+}
+
+// func (c *FoodController) Delete(ctx *fiber.Ctx) error {
+
+// }
