@@ -90,6 +90,16 @@ func (c *FoodController) Update(ctx *fiber.Ctx) error {
 	return ctx.JSON(model.WebResponse[*model.FoodResponse]{Data: response})
 }
 
-// func (c *FoodController) Delete(ctx *fiber.Ctx) error {
+func (c *FoodController) Delete(ctx *fiber.Ctx) error {
+	request := &model.FoodRequest{
+		ID: ctx.Params("foodId"),
+	}
 
-// }
+	err := c.useCase.Delete(ctx.UserContext(), request)
+	if err != nil {
+		c.Log.WithError(err).Error("error deleting food")
+		return err
+	}
+
+	return ctx.JSON(model.WebResponse[bool]{Data: true})
+}
