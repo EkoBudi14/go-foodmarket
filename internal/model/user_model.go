@@ -34,9 +34,14 @@ type RegisterUserRequest struct {
 }
 
 type UpdateUserRequest struct {
-	ID       string `json:"-" validate:"required,max=100"`
-	Password string `json:"password,omitempty" validate:"max=100"`
-	Name     string `json:"name,omitempty" validate:"max=100"`
+	ID          string `json:"-" validate:"required,max=100"`
+	Password    string `json:"password,omitempty" validate:"max=100"`
+	Name        string `json:"name,omitempty" validate:"max=100"`
+	Email       string `json:"email,omitempty" validate:"omitempty,email"`
+	Address     string `json:"address,omitempty" validate:"max=200"`
+	City        string `json:"city,omitempty" validate:"max=100"`
+	HouseNumber string `json:"houseNumber,omitempty" validate:"max=100"`
+	PhoneNumber string `json:"phoneNumber,omitempty" validate:"max=20"`
 }
 
 type LoginUserRequest struct {

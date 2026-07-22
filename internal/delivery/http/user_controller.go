@@ -58,14 +58,14 @@ func (c *UserController) Login(ctx *fiber.Ctx) error {
 	return ctx.JSON(model.WebResponse[*model.UserResponse]{Data: response})
 }
 
-func (c *UserController) Current(ctx *fiber.Ctx) error {
+func (c *UserController) ProfileUser(ctx *fiber.Ctx) error {
 	auth := middleware.GetUser(ctx)
 
 	request := &model.GetUserRequest{
 		ID: auth.ID,
 	}
 
-	response, err := c.UseCase.Current(ctx.UserContext(), request)
+	response, err := c.UseCase.ProfileUsers(ctx.UserContext(), request)
 	if err != nil {
 		c.Log.WithError(err).Warnf("Failed to get current user")
 		return err

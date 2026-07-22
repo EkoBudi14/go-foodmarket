@@ -195,7 +195,7 @@ func (c *UserUseCase) Login(ctx context.Context, request *model.LoginUserRequest
 	return converter.UserToTokenResponse(user), nil
 }
 
-func (c *UserUseCase) Current(ctx context.Context, request *model.GetUserRequest) (*model.UserResponse, error) {
+func (c *UserUseCase) ProfileUsers(ctx context.Context, request *model.GetUserRequest) (*model.UserResponse, error) {
 	tx := c.DB.WithContext(ctx).Begin()
 	defer tx.Rollback()
 
@@ -276,6 +276,26 @@ func (c *UserUseCase) Update(ctx context.Context, request *model.UpdateUserReque
 
 	if request.Name != "" {
 		user.Name = request.Name
+	}
+
+	if request.Email != "" {
+		user.Email = request.Email
+	}
+
+	if request.Address != "" {
+		user.Address = &request.Address
+	}
+
+	if request.City != "" {
+		user.City = &request.City
+	}
+
+	if request.HouseNumber != "" {
+		user.HouseNumber = &request.HouseNumber
+	}
+
+	if request.PhoneNumber != "" {
+		user.PhoneNumber = &request.PhoneNumber
 	}
 
 	if request.Password != "" {

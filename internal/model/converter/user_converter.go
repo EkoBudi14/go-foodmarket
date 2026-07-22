@@ -14,7 +14,6 @@ func UserToResponse(user *entity.User) *model.UserResponse {
 		Address:          user.Address,
 		HouseNumber:      user.HouseNumber,
 		PhoneNumber:      user.PhoneNumber,
-		Token:            user.Token,
 		ProfilePhotoPath: user.ProfilePhotoPath,
 		CreatedAt:        user.CreatedAt,
 		UpdatedAt:        user.UpdatedAt,
